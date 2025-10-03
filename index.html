@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, rgb(130, 2, 99), rgb(91, 75, 10));
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+
+        }
+
+        #bgVideo {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            /* makes sure video covers entire screen */
+            z-index: -1;
+            /* push behind everything */
+        }
+
+        .todo-container {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 420px;
+            height: 500px;
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+        }
+
+        h2 {
+            margin: 0 0 15px;
+            font-size: 22px;
+            font-weight: bold;
+            color: #700c5c;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 15px;
+        }
+
+        .tab {
+            cursor: pointer;
+            font-weight: bold;
+            padding-bottom: 5px;
+            transition: 0.3s;
+        }
+
+        .tab.active {
+            color: rgb(251, 139, 36);
+            border-bottom: 2px solid rgb(251, 139, 36);
+        }
+
+        .slider {
+            display: flex;
+            width: 200%;
+            /* Two panels side by side */
+            transition: transform 0.5s ease-in;
+        }
+
+        .panel {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+
+        }
+
+        .input-section {
+            display: flex;
+            margin-bottom: 20px;
+            background-color: #f1f1f1;
+            border-radius: 20px;
+        }
+
+        .input-section input {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 20px 0 0 20px;
+            outline: none;
+            background: #f1f1f1;
+            font-size: 14px;
+        }
+
+        .input-section button {
+            padding: 12px 20px;
+            border: none;
+            background: rgb(251, 139, 36);
+            color: white;
+            font-size: 14px;
+            border-radius: 0 20px 20px 0;
+            cursor: pointer;
+            transition: 0.3;
+            white-space: nowrap;
+            border-radius: 20px 20px 20px 20px;
+        }
+
+        .input-section button:hover {
+            background: rgb(217, 3, 104);
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 350px;
+            overflow-y: auto;
+        }
+     
+        ul li {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            font-size: 15px;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+        }
+
+        .task {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .circle {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 2px solid rgb(4, 167, 119);
+            display: flex;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .circle.checked {
+            background: rgb(4, 167, 119);
+        }
+
+        .done {
+            text-decoration: line-through;
+            color: gray;
+        }
+
+        .delete {
+            color: rgb(217, 3, 104);
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 18px;
+            margin-left: 10px;
+        }
+
+        .delete:hover {
+            color: rgb(251, 139, 36);
+        }
+    </style>
+</head>
+
+<body>
+    <video autoplay muted loop playsinline id="bgVideo">
+        <source src="2.mp4" type="video/mp4">
+        Your browser does not support HTML5 video.
+    </video>
+    <div class="todo-container">
+        <h2>To-Do List 📝</h2>
+
+        <div class="tabs">
+            <span class="tab active" id="todoTab">To-Do</span>
+            <span class="tab" id="completedTab">Completed</span>
+        </div>
+
+        <div class="slider" id="slider">
+            <!-- To-Do Panel -->
+            <div class="panel">
+                <div class="input-section">
+                    <input type="text" id="taskInput" placeholder="Add your task here">
+                    <button onclick="addTask()">Add</button>
+                </div>
+                <ul id="taskList"></ul>
+            </div>
+
+            <!-- Completed Panel -->
+            <div class="panel">
+                <ul id="completedList"></ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const taskInput = document.getElementById("taskInput");
+        const taskList = document.getElementById("taskList");
+        const completedList = document.getElementById("completedList");
+        const slider = document.getElementById("slider");
+        const todoTab = document.getElementById("todoTab");
+        const completedTab = document.getElementById("completedTab");
+
+        function addTask() {
+            const taskText = taskInput.value.trim();
+            if (!taskText) return;
+
+            const li = document.createElement("li");
+            const taskDiv = document.createElement("div");
+            taskDiv.className = "task";
+
+            const circle = document.createElement("span");
+            circle.className = "circle";
+            circle.onclick = () => {
+                circle.classList.toggle("checked");
+                taskSpan.classList.toggle("done");
+                if (circle.classList.contains("checked")) {
+                    completedList.appendChild(li);
+                } else {
+                    taskList.appendChild(li);
+                }
+            };
+
+            const taskSpan = document.createElement("span");
+            taskSpan.textContent = taskText;
+
+            const del = document.createElement("span");
+            del.className = "delete";
+            del.textContent = "×";
+            del.onclick = () => li.remove();
+
+            taskDiv.appendChild(circle);
+            taskDiv.appendChild(taskSpan);
+            li.appendChild(taskDiv);
+            li.appendChild(del);
+            taskList.appendChild(li);
+
+            taskInput.value = "";
+        }
+
+        taskInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") addTask();
+        });
+
+        todoTab.onclick = () => {
+            slider.style.transform = "translateX(0%)";
+            todoTab.classList.add("active");
+            completedTab.classList.remove("active");
+        };
+
+        completedTab.onclick = () => {
+            slider.style.transform = "translateX(-52%)";
+            completedTab.classList.add("active");
+            todoTab.classList.remove("active");
+        };
+    </script>
+</body>
+
+</html>
